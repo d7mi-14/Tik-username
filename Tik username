@@ -1,0 +1,359 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TikTok Username Hunter</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:20px;
+  background:#090b12;
+  color:white;
+  font-family:Arial,sans-serif;
+}
+
+.container{
+  max-width:750px;
+  margin:30px auto;
+  padding:24px;
+  background:#151925;
+  border:1px solid #30394c;
+  border-radius:18px;
+}
+
+h2{text-align:center}
+.subtitle{text-align:center;color:#999;font-size:13px}
+
+label{
+  display:block;
+  margin:17px 0 8px;
+}
+
+select,input{
+  width:100%;
+  padding:13px;
+  border-radius:9px;
+  border:1px solid #343d52;
+  background:#0d111b;
+  color:white;
+}
+
+button{
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  background:#fe2c55;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button.secondary{background:#30394c}
+
+.actions{
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  margin-top:20px;
+}
+
+.results{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px;
+  margin-top:20px;
+}
+
+.card{
+  background:#0d111b;
+  border:1px solid #30394c;
+  padding:12px;
+  border-radius:10px;
+}
+
+.username{
+  direction:ltr;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.card button{
+  width:100%;
+  margin-top:6px;
+}
+
+.status{
+  color:#aaa;
+  font-size:13px;
+  margin-top:15px;
+  line-height:1.7;
+}
+
+@media(max-width:500px){
+  .container{padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🎯 TikTok Username Hunter</h2>
+<p class="subtitle">مولّد اليوزرات الثلاثية والرباعية</p>
+
+<label>طول اليوزر</label>
+<select id="length">
+  <option value="3">ثلاثي</option>
+  <option value="4" selected>رباعي</option>
+  <option value="both">ثلاثي ورباعي</option>
+</select>
+
+<label>نوع اليوزر</label>
+<select id="type">
+  <option value="mixed">مختلط</option>
+  <option value="letters">حروف فقط</option>
+  <option value="numbers">أرقام فقط</option>
+  <option value="repeat">متكرر ومتناظر</option>
+  <option value="pattern">متناسق</option>
+</select>
+
+<label>عدد النتائج</label>
+<select id="count">
+  <option value="25">25</option>
+  <option value="100" selected>100</option>
+  <option value="250">250</option>
+  <option value="500">500</option>
+  <option value="1000">1000</option>
+</select>
+
+<label>مجموعة الأحرف</label>
+<select id="charset">
+  <option value="abcdefghijklmnopqrstuvwxyz">حروف إنجليزية</option>
+  <option value="abcdefghijklmnopqrstuvwxyz0123456789">حروف وأرقام</option>
+  <option value="0123456789">أرقام</option>
+  <option value="abcdefghijklmnopqrstuvwxyz_">حروف وشرطة سفلية</option>
+</select>
+
+<div class="actions">
+  <button onclick="generate()">⚡ توليد اليوزرات</button>
+  <button class="secondary" onclick="copyAll()">نسخ الكل</button>
+  <button class="secondary" onclick="downloadList()">تنزيل TXT</button>
+  <button class="secondary" onclick="clearAll()">مسح النتائج</button>
+</div>
+
+<div class="status" id="status">
+جاهز للتوليد.
+</div>
+
+<div class="results" id="results"></div>
+
+<p class="status">
+ملاحظة: النتائج اقتراحات وليست دليلاً على توفر اليوزر.
+استخدم زر فتح TikTok للتحقق اليدوي، والتأكيد النهائي يكون من داخل التطبيق.
+</p>
+
+</div>
+
+<script>
+
+let usernames=[];
+
+function randomChar(chars){
+  return chars[Math.floor(Math.random()*chars.length)];
+}
+
+function createUsername(length,type,chars){
+
+  const letters="abcdefghijklmnopqrstuvwxyz";
+  const numbers="0123456789";
+
+  if(type==="letters"){
+    return Array.from({length},()=>randomChar(letters)).join("");
+  }
+
+  if(type==="numbers"){
+    return Array.from({length},()=>randomChar(numbers)).join("");
+  }
+
+  if(type==="repeat"){
+    let a=randomChar(chars);
+    let b=randomChar(chars);
+
+    if(length===3){
+      return Math.random()<0.5
+        ? a+a+a
+        : a+b+a;
+    }
+
+    return Math.random()<0.5
+      ? a+b+b+a
+      : a+a+a+a;
+  }
+
+  if(type==="pattern"){
+    let result="";
+
+    for(let i=0;i<length;i++){
+      result+=randomChar(chars);
+    }
+
+    return result;
+  }
+
+  return Array.from(
+    {length},
+    ()=>randomChar(chars)
+  ).join("");
+}
+
+function generate(){
+
+  let length=document.getElementById("length").value;
+  let type=document.getElementById("type").value;
+  let chars=document.getElementById("charset").value;
+  let count=Number(document.getElementById("count").value);
+
+  let lengths=length==="both"
+    ? [3,4]
+    : [Number(length)];
+
+  let set=new Set();
+  let attempts=0;
+
+  while(set.size<count && attempts<count*60){
+
+    let selectedLength=randomChar(lengths);
+    let username=createUsername(
+      Number(selectedLength),
+      type,
+      chars
+    );
+
+    if(
+      /^[a-z0-9_]+$/.test(username) &&
+      !username.endsWith("_")
+    ){
+      set.add(username);
+    }
+
+    attempts++;
+  }
+
+  usernames=[...set];
+
+  render();
+
+  document.getElementById("status").textContent=
+    "تم توليد "+usernames.length+
+    " يوزر. حالة التوفر: غير مفحوصة.";
+}
+
+function render(){
+
+  let results=document.getElementById("results");
+
+  results.innerHTML="";
+
+  usernames.forEach(username=>{
+
+    let card=document.createElement("div");
+    card.className="card";
+
+    let name=document.createElement("div");
+    name.className="username";
+    name.textContent="@"+username;
+
+    let copy=document.createElement("button");
+    copy.textContent="نسخ اليوزر";
+
+    copy.onclick=()=>copyText("@"+username);
+
+    let check=document.createElement("button");
+    check.className="secondary";
+    check.textContent="فتح TikTok";
+
+    check.onclick=()=>{
+      window.open(
+        "https://www.tiktok.com/@"+
+        encodeURIComponent(username),
+        "_blank",
+        "noopener"
+      );
+    };
+
+    card.appendChild(name);
+    card.appendChild(copy);
+    card.appendChild(check);
+
+    results.appendChild(card);
+
+  });
+}
+
+async function copyText(text){
+
+  try{
+    await navigator.clipboard.writeText(text);
+    document.getElementById("status").textContent=
+      "تم النسخ بنجاح.";
+  }catch(e){
+    document.getElementById("status").textContent=
+      "تعذر النسخ تلقائياً.";
+  }
+
+}
+
+function copyAll(){
+
+  if(usernames.length===0){
+    alert("ولّد اليوزرات أولاً");
+    return;
+  }
+
+  copyText(usernames.map(x=>"@"+x).join("\n"));
+}
+
+function downloadList(){
+
+  if(usernames.length===0){
+    alert("لا توجد نتائج");
+    return;
+  }
+
+  let blob=new Blob(
+    [usernames.map(x=>"@"+x).join("\n")],
+    {type:"text/plain;charset=utf-8"}
+  );
+
+  let url=URL.createObjectURL(blob);
+
+  let a=document.createElement("a");
+  a.href=url;
+  a.download="TikTok_Usernames.txt";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function clearAll(){
+
+  usernames=[];
+  document.getElementById("results").innerHTML="";
+  document.getElementById("status").textContent=
+    "تم مسح النتائج.";
+
+}
+
+</script>
+
+</body>
+</html>
+ in
